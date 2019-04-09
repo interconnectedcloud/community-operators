@@ -1,0 +1,4 @@
+packageName: certmanager
+channels:
+  - name: alpha
+    currentCSV: certmanager.v0.7.0

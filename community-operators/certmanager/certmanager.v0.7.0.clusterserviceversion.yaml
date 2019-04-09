@@ -1,0 +1,153 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: >-
+      [{"apiVersion":"certmanager.k8s.io/v1alpha1","kind":"Certificate","metadata":{"name":"example-com"},"spec":{"secretName":"example-com-tls","issuerRef":{"name":"ca-issuer","kind":"Issuer"},"commonName":"example.com","organization":["Example CA"],"dnsNames":["example.com","www.example.com"]}},{"apiVersion": "certmanager.k8s.io/v1alpha1","kind": "Issuer", "metadata":{"name":"ca-issuer"},"spec":{"ca":{"secretName": "my-selfsigned-cert"}}}]
+    capabilities: Basic Install
+    categories: Networking, Security
+    description: Certificate Creation and Update
+    support: community
+  name: certmanager.v0.7.0
+  namespace: placeholder
+spec:
+  description: |
+    cert-manager is a Kubernetes add-on to automate the management and issuance of
+    TLS certificates from various issuing sources.
+
+    It will ensure certificates are valid and up to date periodically, and attempt
+    to renew certificates at an appropriate time before expiry.
+
+  displayName: cert-manager
+  maturity: alpha
+  provider:
+    name: https://github.com/jetstack/cert-manager
+  version: 0.7.0
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - version: v1alpha1
+      kind: Certificate
+      description: A declaration of a required Certificate
+      displayName: Certificate
+      name: certificates.certmanager.k8s.io
+      resources:
+      - kind: Secret
+        name: ""
+        version: v1
+      specDescriptors:
+      - description: The name of the secret into which the certificate credentials are put
+        displayName: Secret Name
+        path: secretName
+      - description: A reference to the issuer to use when creating the certificate
+        displayName: Issuer
+        path: issuerRef
+      - description: The common name to include in the certificate
+        displayName: Common Name
+        path: commonName
+      - description: Additional DNS names to include in the certificate
+        displayName: DNS Names
+        path: dnsNames
+    - version: v1alpha1
+      kind: Issuer
+      description: A declaration of a namespace specific issuer
+      displayName: Issuer
+      name: issuers.certmanager.k8s.io
+      resources:
+      - kind: Secret
+        name: ""
+        version: v1
+      specDescriptors:
+      - description: Identify the issuer as a self signed issuer
+        displayName: Self-Signed Issuer
+        path: selfSigned
+      - description: Identify the issuer as a CA issuer
+        displayName: CA Issuer
+        path: ca
+    - version: v1alpha1
+      kind: ClusterIssuer
+      description: A declaration of a cluster-wide issuer
+      displayName: ClusterIssuer
+      name: clusterissuers.certmanager.k8s.io
+      resources:
+      - kind: Secret
+        name: ""
+        version: v1
+      specDescriptors:
+      - description: Identify the issuer as a self signed issuer
+        displayName: Self-Signed Issuer
+        path: selfSigned
+      - description: Identify the issuer as a CA issuer
+        displayName: CA Issuer
+        path: ca
+  install:
+    spec:
+      deployments:
+      - name: cert-manager-controller
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              name: cert-manager-controller
+          template:
+            metadata:
+              labels:
+                name: cert-manager-controller
+            spec:
+              serviceAccountName: cert-manager
+              containers:
+              - name: cert-manager-controller
+                image: quay.io/jetstack/cert-manager-controller:v0.7.0-alpha.0
+                imagePullPolicy: IfNotPresent
+                args:
+                - --cluster-resource-namespace=$(POD_NAMESPACE)
+                - --leader-election-namespace=$(POD_NAMESPACE)
+                env:
+                - name: POD_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.namespace
+                ports:
+                - containerPort: 9402
+                  name: metrics
+      permissions:
+      - rules:
+        - apiGroups:
+          - "certmanager.k8s.io"
+          resources:
+          - "certificates"
+          - "certificates/finalizers"
+          - "issuers"
+          - "clusterissuers"
+          - "orders"
+          - "orders/finalizers"
+          - "challenges"
+          verbs:
+          - '*'
+        - apiGroups:
+          - ""
+          resources:
+          - "configmaps"
+          - "secrets"
+          - "events"
+          - "services"
+          - "pods"
+          verbs:
+          - '*'
+        - apiGroups:
+          - "extensions"
+          resources:
+          - "ingresses"
+          verbs:
+          - '*'
+        serviceAccountName: cert-manager
+    strategy: deployment
+  installModes:
+  - supported: true
+    type: OwnNamespace
+  - supported: true
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: false
+    type: AllNamespaces
