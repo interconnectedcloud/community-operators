@@ -5,7 +5,7 @@ metadata:
     alm-examples: >-
       [{"apiVersion":"interconnectedcloud.github.io/v1alpha1","kind":"Qdrouterd","metadata":{"name":"amq-interconnect"},"spec":{"count":2,"deploymentMode": "lbfrontend","image":"quay.io/interconnectedcloud/qdrouterd:1.5.0"}}]
     capabilities: Basic Install
-    categories: Messaging
+    categories: "Streaming & Messaging, Networking"
   name: qdrouterd-operator.v0.1.0
   namespace: placeholder
 spec:
@@ -57,7 +57,7 @@ spec:
         displayName: Conditions
         path: conditions
   description: |
-    The qdrouterd Operator does x y and z
+    A Kubernetes operator to manage deployments of the Apache Qpid Dispatch Router
   displayName: Qdrouterd Operator
   install:
     spec:
@@ -161,5 +161,7 @@ spec:
   - supported: true
     type: AllNamespaces
   maturity: alpha
-  provider: {}
+  provider:
+      name: Red Hat
   version: 0.1.0
+  keywords: ['router', 'amqp', 'messaging', 'communication', 'multi-cloud']
