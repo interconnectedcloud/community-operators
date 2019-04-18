@@ -56,6 +56,45 @@ spec:
       - description: The current conditions
         displayName: Conditions
         path: conditions
+    required:
+    - version: v1alpha1
+      kind: Certificate
+      description: A declaration of a required Certificate
+      displayName: Certificate
+      name: certificates.certmanager.k8s.io
+      resources:
+      - kind: Secret
+        name: ""
+        version: v1
+      specDescriptors:
+      - description: The name of the secret into which the certificate credentials are put
+        displayName: Secret Name
+        path: secretName
+      - description: A reference to the issuer to use when creating the certificate
+        displayName: Issuer
+        path: issuerRef
+      - description: The common name to include in the certificate
+        displayName: Common Name
+        path: commonName
+      - description: Additional DNS names to include in the certificate
+        displayName: DNS Names
+        path: dnsNames
+    - version: v1alpha1
+      kind: Issuer
+      description: A declaration of a namespace specific issuer
+      displayName: Issuer
+      name: issuers.certmanager.k8s.io
+      resources:
+      - kind: Secret
+        name: ""
+        version: v1
+      specDescriptors:
+      - description: Identify the issuer as a self signed issuer
+        displayName: Self-Signed Issuer
+        path: selfSigned
+      - description: Identify the issuer as a CA issuer
+        displayName: CA Issuer
+        path: ca
   description: |
     A Kubernetes operator to manage deployments of the Apache Qpid Dispatch Router
   displayName: Qdrouterd Operator
@@ -111,6 +150,18 @@ spec:
           verbs:
           - '*'
         - apiGroups:
+          - "route.openshift.io"
+          resources:
+          - routes
+          - routes/custom-host
+          - routes/status
+          verbs:
+          - get
+          - list
+          - watch
+          - create
+          - delete
+        - apiGroups:
           - "rbac.authorization.k8s.io"
           resources:
           - rolebindings
@@ -136,6 +187,17 @@ spec:
           - statefulsets
           verbs:
           - '*'
+        - apiGroups:
+          - "certmanager.k8s.io"
+          resources:
+          - issuers
+          - certificates
+          verbs:
+          - get
+          - list
+          - watch
+          - create
+          - delete
         - apiGroups:
           - monitoring.coreos.com
           resources:
