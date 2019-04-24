@@ -3,9 +3,15 @@ kind: ClusterServiceVersion
 metadata:
   annotations:
     alm-examples: >-
-      [{"apiVersion":"interconnectedcloud.github.io/v1alpha1","kind":"Qdrouterd","metadata":{"name":"amq-interconnect"},"spec":{"count":2,"deploymentMode": "lbfrontend","image":"quay.io/interconnectedcloud/qdrouterd:1.5.0"}}]
+      [{"apiVersion":"interconnectedcloud.github.io/v1alpha1","kind":"Qdrouterd","metadata":{"name":"my-interconnect"},"spec":{"count":2,"deploymentMode": "lbfrontend"}}]
     capabilities: Basic Install
     categories: "Streaming & Messaging, Networking"
+    description: "Layer 7 addressing across Kubernetes clusters"
+    certified: "false"
+    containerImage: "quay.io/interconnectedcloud/qdrouterd-operator"
+    createdAt: "2019-04-24T14:00:00Z"
+    repository: https://github.com/interconnectedcloud/qdrouterd-operator
+    support: interconnectedcloud@redhat.com
   name: qdrouterd-operator.v0.1.0
   namespace: placeholder
 spec:
@@ -96,7 +102,59 @@ spec:
         displayName: CA Issuer
         path: ca
   description: |
-    A Kubernetes operator to manage deployments of the Apache Qpid Dispatch Router
+
+    An operator for managing Layer 7 (a.k.a. Application Layer) addressing and routing within and across [Kubernetes](https://kubernetes.io/) or
+    [OpenShift](https://www.openshift.com/) clusters.
+
+    It provides a `Qdrouterd` [Custom Resource Definition](https://kubernetes.io/docs/tasks/access-kubernetes-api/extend-api-custom-resource-definitions/)
+    (CRD) that describes a deployment of [Apache Qpid Dispatch Router](https://qpid.apache.org/components/dispatch-router/index.html). The number of
+    messaging routers, the deployment topology, address semantics and other desired options can be specified through the CRD.
+
+    ### Usage
+
+    A minimal example of a `qdrouterd` (a.k.a. `qdr`) resource is as follows:
+
+    ```
+      apiVersion: interconnectedcloud.github.io/v1alpha1
+      kind: Qdrouterd
+      metadata:
+        name: example-interconnect
+      spec:
+        count: 3
+        deploymentMode: lbfrontend
+    ```
+
+    This will create a deployment of 3 router instances, all connected together with default address semantics. It will also create
+    a service through which the router mesh can be accessed. It will be listening on port 5672 for AMQP 1.0 client connections and on
+    port 8672 for websockets connections. A console is available via the 8672 port also.
+
+    Address semantics can be altered by defining address elements, e.g.:
+
+    ```
+      apiVersion: interconnectedcloud.github.io/v1alpha1
+      kind: Qdrouterd
+      metadata:
+        name: example-interconnect
+      spec:
+        count: 3
+        deploymentMode: lbfrontend
+        addresses:
+        - prefix: foo
+          distribution: balanced
+        - prefix: bar
+          distribution: multicast
+        - prefix: baz
+          distribution: closest
+    ```
+
+    More information on the features of Apache Qpid Dispatch Router can be found here: https://qpid.apache.org/releases/qpid-dispatch-1.7.0/user-guide/index.html
+
+    ### Getting help
+
+    If you encounter any issues while using this operator, you can get help using:
+
+    * [interconnectedcloud mailing list](https://www.redhat.com/mailman/listinfo/interconnectedcloud)
+
   displayName: Qdrouterd Operator
   install:
     spec:
@@ -223,6 +281,9 @@ spec:
   - supported: true
     type: AllNamespaces
   maturity: alpha
+  maintainers:
+  - name: Interconnected Cloud
+    email: interconnectedcloud@redhat.com
   provider:
       name: Red Hat
   version: 0.1.0
