@@ -25,10 +25,24 @@ spec:
       name: qdrouterds.interconnectedcloud.github.io
       resources:
       - kind: Service
-        name: ""
         version: v1
       - kind: Deployment
-        name: ""
+        version: v1
+      - kind: ServiceAccount
+        version: v1
+      - kind: qdrouterds
+        version: v1alpha1
+      - kind: rolebindings
+        version: v1
+      - kind: pods
+        version: v1
+      - kind: configmaps
+        version: v1
+      - kind: roles
+        version: v1
+      - kind: routes
+        version: v1
+      - kind: secrets
         version: v1
       specDescriptors:
       - description: The desired number of member pods for qdrouterd mesh
